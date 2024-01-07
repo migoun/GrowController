@@ -1,0 +1,11 @@
+[Unit]
+Description=Grow Control Board
+
+[Service]
+ExecStart=/home/pi/Code/GrowControl/hardware/control
+WorkingDirectory=/home/pi/Code/GrowControl/hardware
+Restart=always
+User=root
+
+[Install]
+WantedBy=multi-user.target
