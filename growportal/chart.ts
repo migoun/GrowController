@@ -92,14 +92,15 @@ const htmlContent = (dates: string, temp: string, hum: string, vpd: string, firs
               height: 800
           };
 
+          var cell;
           // Function to change the background color and add a bold red frame around a cell
-          function toggleCellStyle(cellId) {
-            var cell = document.getElementById(cellId);
-            if (cell.classList.contains('highlight')) {
-              // If the cell has the 'highlight' class, remove it
-              cell.classList.remove('highlight');
-            } else {
-              // If the cell doesn't have the 'highlight' class, add it
+          function markCell(cellId) {            
+            let newCell = document.getElementById(cellId);
+            if (cell != newCell)
+            {
+              if (cell) cell.classList.remove('highlight');
+              cell = newCell;
+              console.log(cell);
               cell.classList.add('highlight');
             }
           }
@@ -113,11 +114,12 @@ const htmlContent = (dates: string, temp: string, hum: string, vpd: string, firs
               data.points.forEach(d => {
                 obj[d.data.name] = d.y.toPrecision(3);
               });          
-              toggleCellStyle(Math.round(obj["Temperature"]) + "-" + Math.round((obj["Humidity"] / 5)) * 5);         
-          })
-          
-          .on('plotly_unhover', function(data){          
-                       
+              markCell(Math.round(obj["Temperature"]) + "-" + Math.round((obj["Humidity"] / 5)) * 5);         
+          });
+
+          GRAPH.addEventListener('mouseleave', function() {
+            cell.classList.remove('highlight');
+            cell = null;
           });
       </script>
     </body>

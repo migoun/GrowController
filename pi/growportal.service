@@ -1,0 +1,13 @@
+[Unit]
+Description=GrowPortal WebApp
+
+[Service]
+ExecStart=/usr/bin/node /home/pi/Code/GrowControl/growportal/build/index.js
+Restart=always
+# Set the working directory to your application's root
+WorkingDirectory=/home/pi/Code/GrowControl/growportal
+# Ensure the environment is set correctly
+Environment=NODE_ENV=production
+
+[Install]
+WantedBy=multi-user.target
