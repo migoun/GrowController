@@ -1,6 +1,7 @@
 // https://plotly.com/javascript/time-series/#time-series-with-rangeslider
 import { getData } from "./db";
 import { vpd, vpdChart } from "./vpd";
+import { Measure } from "./measure";
 
 function daysBefore(currentDate: string, days: number): string
 {
@@ -50,7 +51,7 @@ const htmlContent = (dates: string, temp: string, hum: string, vpd: string, firs
                   mode: "lines",    
                   name: 'VPD',    
                   line: {color: '#999999'},
-                  hovertemplate: '%{y}%',
+                  hovertemplate: '%{y}',
                   x: ${dates},
                   y: ${vpd}
               }
@@ -100,8 +101,7 @@ const htmlContent = (dates: string, temp: string, hum: string, vpd: string, firs
             {
               if (cell) cell.classList.remove('highlight');
               cell = newCell;
-              console.log(cell);
-              cell.classList.add('highlight');
+              if (cell) cell.classList.add('highlight');
             }
           }
 
@@ -118,20 +118,15 @@ const htmlContent = (dates: string, temp: string, hum: string, vpd: string, firs
           });
 
           GRAPH.addEventListener('mouseleave', function() {
-            cell.classList.remove('highlight');
-            cell = null;
+            if (cell) {
+              cell.classList.remove('highlight');
+              cell = null;
+            }
           });
       </script>
     </body>
   </html>
   `
-}
-
-interface Measure {
-  id: number,
-  timestamp: string,
-  temperature: number,
-  humidity: number
 }
 
 export function getChart()

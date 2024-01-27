@@ -10,7 +10,16 @@ export function getData(): Promise<any>
             if (err) {
                 reject({ error: err.message });
             } else {
-                resolve(rows);
+                // return all db entries, but increase hour by 1. Because it seems like UTC in the database
+                resolve(rows.map(function(e: any) {
+                    // Create a Date object from the timestamp string
+                    let originalTimestamp = new Date(e.timestamp);
+                    // Add one hour to the Date object
+                    originalTimestamp.setHours(originalTimestamp.getHours() + 2);
+                    // Format the new Date object to the desired string format
+                    e.timestamp = originalTimestamp.toISOString().slice(0, 19).replace("T", " ");
+                    return e;
+                }));
             }
         });
         
