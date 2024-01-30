@@ -1,0 +1,3 @@
+The two service files should be placed in `/etc/systemd/system/` on the Raspberry Pi OS. growcontrol initiates the C-program responsible for controlling the PCB and sensor, while growportal launches the webserver.
+
+Place the `wpa_supplicant.conf` file in `/etc/wpa_supplicant`. This file contains the WiFi configuration for your home router and facilitates automatic connection to your WiFi upon boot.
