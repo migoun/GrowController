@@ -1,19 +1,21 @@
-import { sin } from 'mathjs';
-import sqlite3 from 'sqlite3';
-
-export function getData(since: string = ""): Promise<any>
-{
-    return new Promise<any>((resolve, reject) => {              
-        const db: sqlite3.Database = new sqlite3.Database('growcontrol.db');
-        let startDate = since ? ' WHERE timestamp >= "' + since + '";': '';
-        if (since == "all") startDate = '';
-
-        db.all('SELECT * FROM measurement_history' + startDate, (err, rows) => {
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.getData = void 0;
+const sqlite3_1 = __importDefault(require("sqlite3"));
+function getData() {
+    return new Promise((resolve, reject) => {
+        const db = new sqlite3_1.default.Database('growcontrol.db');
+        let result = {};
+        db.all('SELECT * FROM measurement_history', (err, rows) => {
             if (err) {
                 reject({ error: err.message });
-            } else {
+            }
+            else {
                 // return all db entries, but increase hour by 1. Because it seems like UTC in the database
-                resolve(rows.map(function(e: any) {
+                resolve(rows.map(function (e) {
                     // Create a Date object from the timestamp string
                     let originalTimestamp = new Date(e.timestamp);
                     // Add one hour to the Date object
@@ -24,7 +26,7 @@ export function getData(since: string = ""): Promise<any>
                 }));
             }
         });
-        
         db.close();
     });
 }
+exports.getData = getData;

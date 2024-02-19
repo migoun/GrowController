@@ -9,10 +9,11 @@
 #include "sht31.h"
 #include "db.h"
 
-// interval of sensor measurement
+// interval of sensor measurement. Seconds after the value on the display changes temp/hum
 #define MEASURE_INTERVAL 5
-// how much MEASURE_INTERVALs pass until
-#define DB_WRITE_INTERVAL 6
+// how much MEASURE_INTERVALs pass until the current values will be written to the database
+#define DB_WRITE_INTERVAL 12
+// 12 x 5 seconds would be a minute
 
 char displayText[10];
 bool humidityMode = false;

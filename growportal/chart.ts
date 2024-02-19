@@ -2,144 +2,49 @@
 import { getData } from "./db";
 import { vpd, vpdChart } from "./vpd";
 import { Measure } from "./measure";
+import * as fs from 'fs';
 
-function daysBefore(currentDate: string, days: number): string
+function hoursAgo(currentDate: string, hours: number): string
 {
   const d = new Date(currentDate);
-  return new Date(d.setDate(d.getDate() - days)).toISOString();
+  return new Date(d.setHours(d.getHours() - hours)).toISOString();
 }
 
-const htmlContent = (dates: string, temp: string, hum: string, vpd: string, firstDate: string, lastDate: string) => 
+const htmlContent = (dates: string, temp: string, hum: string, vpd: string, firstDate: string, lastDate: string, leafOffset: number) => 
 {
-  return `
-  <!DOCTYPE html>
-  <html>
-  <head>
-    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js" charset="utf-8"></script>    
-    <style>
-      .highlight {
-        border: 2px solid red; /* Red border */
-        font-weight: bold; /* Bold text */
-      }
-    </style>
-  </head>
-    <body>    
-      <div id="tempchart">
-      </div>
-      ${vpdChart()}
-      <script>
-          var data1 = [{
-                  type: "scatter",
-                  mode: "lines",    
-                  name: 'Temperature',    
-                  line: {color: '#7F0000'},
-                  hovertemplate: '%{y:.2f}°',
-                  x: ${dates},
-                  y: ${temp}
-              },
-              {
-                  type: "scatter",
-                  mode: "lines",    
-                  name: 'Humidity',    
-                  line: {color: '#00007F'},
-                  hovertemplate: '%{y}%',
-                  x: ${dates},
-                  y: ${hum}
-              },
-              {
-                  type: "scatter",
-                  mode: "lines",    
-                  name: 'VPD',    
-                  line: {color: '#999999'},
-                  hovertemplate: '%{y}',
-                  x: ${dates},
-                  y: ${vpd}
-              }
-          ];
-
-          var layout = {
-              title: 'Grow Environment',              
-              hovermode: 'x unified',
-              xaxis: {
-                  autorange: true,
-                  range: ["${firstDate}", "${lastDate}"],
-                  rangeselector: {
-                      buttons: [
-                          {step: 'all'},
-                          {
-                            count: 1,
-                            label: 'month',
-                            step: 'month',
-                            stepmode: 'backward'
-                          },                       
-                          {
-                              count: 7,
-                              label: 'week',
-                              step: 'day',
-                              stepmode: 'backward'
-                          }
-                      ]
-                  },
-                  rangeslider: {
-                      range: ["${daysBefore(lastDate, 2)}", "${lastDate}"]
-                  },
-                  type: 'date'
-              },
-              yaxis: {
-                  autorange: false,
-                  range: [0, 90],
-                  type: 'linear'
-              },
-              height: 800
-          };
-
-          var cell;
-          // Function to change the background color and add a bold red frame around a cell
-          function markCell(cellId) {            
-            let newCell = document.getElementById(cellId);
-            if (cell != newCell)
-            {
-              if (cell) cell.classList.remove('highlight');
-              cell = newCell;
-              if (cell) cell.classList.add('highlight');
-            }
-          }
-
-          GRAPH = document.getElementById('tempchart');
-          hoverInfo = document.getElementById('hoverinfo');
-          Plotly.newPlot( "tempchart", data1, layout);
-
-          GRAPH.on('plotly_hover', function(data){
-              let obj = {};
-              data.points.forEach(d => {
-                obj[d.data.name] = d.y.toPrecision(3);
-              });          
-              markCell(Math.round(obj["Temperature"]) + "-" + Math.round((obj["Humidity"] / 5)) * 5);         
-          });
-
-          GRAPH.addEventListener('mouseleave', function() {
-            if (cell) {
-              cell.classList.remove('highlight');
-              cell = null;
-            }
-          });
-      </script>
-    </body>
-  </html>
-  `
+  let file = fs.readFileSync('chart.html','utf8');
+  return file
+          .replaceAll("_VPDCHART_", vpdChart(leafOffset))
+          .replaceAll("_DATES_", dates)
+          .replaceAll("_TEMPERATURE_", temp)
+          .replaceAll("_HUMIDITY_", hum)
+          .replaceAll("_VPD_", vpd)
+          .replaceAll("_FIRSTDATE_", firstDate)
+          .replaceAll("_LASTDATE_", lastDate);
 }
 
-export function getChart()
+export function getChart(leafOffset: number, firstDate: string = "")
 {
   return new Promise<any>((resolve, reject) => { 
-    getData()
+    getData(firstDate)
       .then((data) => {
+        let startDate: string;
+        if (firstDate == "all")
+          startDate = data[0].timestamp;
+        else if (firstDate == "")
+          startDate = hoursAgo(data[data.length - 1].timestamp, 24);
+        else startDate = firstDate;
+
+        let endDate = data[data.length - 1].timestamp;
+
         resolve(htmlContent(
           JSON.stringify(data.map((x: Measure) => x.timestamp)),
           JSON.stringify(data.map((x: Measure) => x.temperature)),
           JSON.stringify(data.map((x: Measure) => x.humidity)),
-          JSON.stringify(data.map((x: Measure) => vpd(x.temperature, x.humidity))),
-          data[0].timestamp, data[data.length - 1].timestamp
+          JSON.stringify(data.map((x: Measure) => vpd(x.temperature, x.humidity, leafOffset))),
+          startDate,
+          endDate,
+          leafOffset
         ));
       })
       .catch((err) => reject(JSON.stringify(err)));
