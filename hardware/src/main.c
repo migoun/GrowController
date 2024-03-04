@@ -8,8 +8,9 @@
 // #include "dht.h"
 #include "sht31.h"
 #include "db.h"
+#include "relay.h"
 
-// interval of sensor measurement. Seconds after the value on the display changes temp/hum
+// interval of sensor measurement. Accordingly the value on the display changes temp/hum
 #define MEASURE_INTERVAL 5
 // how much MEASURE_INTERVALs pass until the current values will be written to the database
 #define DB_WRITE_INTERVAL 12
@@ -50,17 +51,23 @@ void timer(int timer1)
             humidityMode = !humidityMode;
             // printf("\nhumidity: %d\n", (int)humidityMode);
 
+            // Relay controlled humidifier /////
+            int min = GetGBSetting("relay_min");
+            int max = GetGBSetting("relay_max");
+            if (min > 0 && max > 0)
+            {
+                ControlHumidifierRelay(data.humidity, min, max);            
+            }
+
+            /////////////////
+
             alarm(MEASURE_INTERVAL); 
 
             if (measure_counter++ == DB_WRITE_INTERVAL)
             {
                 measure_counter = 0;
-                // Store results in the db            
-                char* msg = InsertDB(data.temperature, data.humidity);
-                if (!strcmp(msg, "ok"))
-                {
-                    syslog(LOG_ERR, strcat("DB return message: ", msg));
-                }
+                // // Store results in the db            
+                InsertDBMeasurement(data.temperature, data.humidity);                 
             }
         }
         else
@@ -88,6 +95,9 @@ int main()
 
     // Initialize SHT Sensor
     InitSHT();
+
+    // Initialize Relay Connection
+    void InitRelay();
 
     // Get Database ready
     if (InitDB() != 0)
