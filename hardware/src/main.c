@@ -97,7 +97,7 @@ int main()
     InitSHT();
 
     // Initialize Relay Connection
-    void InitRelay();
+    InitRelay();
 
     // Get Database ready
     if (InitDB() != 0)

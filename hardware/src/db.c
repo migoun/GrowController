@@ -67,8 +67,8 @@ int InsertDBMeasurement(float temperature, float humidity)
 {
     // Insert data
     char insertDataSQL[256];
-    snprintf(insertDataSQL, sizeof(insertDataSQL), "INSERT INTO measurement_history (temperature, humidity)\
-        VALUES (%f, %f);", temperature, humidity);
+    snprintf(insertDataSQL, sizeof(insertDataSQL), "INSERT INTO measurement_history (timestamp, temperature, humidity)\
+        VALUES (datetime('now', 'localtime'), %f, %f);", temperature, humidity);
 
     int rc = sqlite3_exec(db, insertDataSQL, 0, 0, 0);
 
