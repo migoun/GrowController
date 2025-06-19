@@ -1,0 +1,68 @@
+<style>
+    /* Style for the table */
+    table {
+        width: 60em;
+        border-collapse: collapse;
+        border: 1px solid #ddd; /* Slight border for the table */
+    }
+    
+    /* Style for the table header */
+    th {
+        background-color: #f2f2f2; /* Light gray background for the header */
+        border: 1px solid #ddd; /* Slight border for the header cells */
+        font-size: 14px; /* Adjust font size for the header */
+        font-family: 'Arial', sans-serif;                 
+    }
+    
+    /* Style for the table rows */
+    td {
+        border: 1px solid #ddd; /* Slight border for the table cells */
+        font-size: 14px; /* Adjust font size for the header */
+        font-family: 'Arial', sans-serif; 
+    }    
+
+    .earlyveg {
+        background-color: lightgreen;
+    }
+
+    .lateveg {
+        background-color: lightblue;
+    }
+
+    .lateflower {
+        background-color: #d8bfd8;
+    }
+
+    .danger {
+        background-color: #ffaaaa;
+    }
+</style>
+<table style="float: left; width: 900px;margin-right:20px;">
+    _CONTENT_
+</table>
+<table style="width: 200px;">
+    <tr>
+        <td class="earlyveg">Early Veg Stage</td>
+    </tr>
+    <tr>
+        <td class="lateveg">Late Veg / Early Flower Stage</td>
+    </tr>
+    <tr>
+        <td class="lateflower">Mid / Late Flower Stage</td>
+    </tr>
+    <tr>
+        <td class="danger">Danger Zone</td>
+    </tr>
+</table>
+<p style="font-family: 'Arial', sans-serif;">
+LeafTemperature Offset (lower than room temp - measured by infrared thermometer)<br>
+<input type="number" id="leafOffsetInput" value=_LEAFOFFSET_>
+</p>
+<script>
+var input = document.getElementById('leafOffsetInput');
+input.addEventListener('change', (event) => {
+    let offset = event.target.value;                    
+    localStorage.setItem('offset', offset);
+    window.location.href = window.location.origin + window.location.pathname + "?offset=" + offset + "&startPage=" + localStorage.getItem('startDate');        
+});
+</script>

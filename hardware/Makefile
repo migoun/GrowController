@@ -6,7 +6,7 @@ CFLAGS = -Wall -Wextra -g
 
 # Source files
 SRC_DIR = src
-SRC_FILES = main.c control.c sht31.c db.c
+SRC_FILES = main.c control.c sht31.c db.c relay.c
 SRCS = $(addprefix $(SRC_DIR)/, $(SRC_FILES))
 
 # Object files

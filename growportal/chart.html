@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+  <html>
+  <head>
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js" charset="utf-8"></script>    
+    <style>
+      .highlight {
+        border: 2px solid red; /* Red border */
+        font-weight: bold; /* Bold text */
+      }
+    </style>
+  </head>
+    <body>    
+      <div id="tempchart">
+      </div>
+      _VPDCHART_
+      <script>
+          var data1 = [{
+                  type: "scatter",
+                  mode: "lines",    
+                  name: 'Temperature',    
+                  line: {color: '#7F0000'},
+                  hovertemplate: '%{y:.2f}°',
+                  x: _DATES_,
+                  y: _TEMPERATURE_
+              },
+              {
+                  type: "scatter",
+                  mode: "lines",    
+                  name: 'Humidity',    
+                  line: {color: '#00007F'},
+                  hovertemplate: '%{y}%',
+                  x: _DATES_,
+                  y: _HUMIDITY_
+              },
+              {
+                  type: "scatter",
+                  mode: "lines",    
+                  name: 'VPD',    
+                  line: {color: '#999999'},
+                  hovertemplate: '%{y}',
+                  x: _DATES_,
+                  y: _VPD_
+              }
+          ];
+
+          var layout = {
+              title: 'Grow Environment',              
+              hovermode: 'x unified',
+              xaxis: {
+                  autorange: false,
+                  range: ["_FIRSTDATE_", "_LASTDATE_"],
+                  rangeselector: {
+                      buttons: [
+                          {step: 'all'},
+                          {
+                            count: 1,
+                            label: 'month',
+                            step: 'month',
+                            stepmode: 'backward'
+                          },                       
+                          {
+                              count: 7,
+                              label: 'week',
+                              step: 'day',
+                              stepmode: 'backward'
+                          },
+                          {
+                              count: 24,
+                              label: '24 h',
+                              step: 'hour',
+                              active: true
+                          }
+                      ]
+                  },
+                  type: 'date',
+                  fixedrange: true
+              },
+              yaxis: {
+                  autorange: false,
+                  range: [0, 90],
+                  type: 'linear',
+                  fixedrange: true
+              },
+              height: 700
+          };
+
+          var cell;
+          // Function to change the background color and add a bold red frame around a cell
+          function markCell(cellId) {            
+            let newCell = document.getElementById(cellId);
+            if (cell != newCell)
+            {
+              if (cell) cell.classList.remove('highlight');
+              cell = newCell;
+              if (cell) cell.classList.add('highlight');
+            }
+          }
+
+          GRAPH = document.getElementById('tempchart');
+          hoverInfo = document.getElementById('hoverinfo');
+          Plotly.newPlot( "tempchart", data1, layout);
+
+          GRAPH.on('plotly_hover', function(data){
+              let obj = {};
+              data.points.forEach(d => {
+                obj[d.data.name] = d.y.toPrecision(3);
+              });          
+              markCell(Math.round(obj["Temperature"]) + "-" + Math.round((obj["Humidity"] / 5)) * 5);         
+          });
+
+          GRAPH.on('plotly_relayout', (val) => {
+            console.log(val);
+            let startDate = val['xaxis.range[0]'] ? val['xaxis.range[0]'] : 'all';
+            localStorage.setItem('startDate', startDate ? startDate : "all");
+            let offset = localStorage.getItem('offset');
+            window.location.href = window.location.origin + window.location.pathname + (offset ? "?offset=" + offset + "&startDate=" : "?startDate=") + startDate;
+          });
+
+          GRAPH.addEventListener('mouseleave', function() {
+            if (cell) {
+              cell.classList.remove('highlight');
+              cell = null;
+            }
+          });          
+      </script>
+    </body>
+  </html>

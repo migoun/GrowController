@@ -1,26 +1,31 @@
 import express from 'express';
 import { getChart } from "./chart";
-import * as path from 'path';
 
 // index.ts
 const app = express();
 const port = 3000;
+import bodyParser from 'body-parser';
+
+var leafOffset: number = 2;
+var startDate: string = "";
+
+// Middleware to parse JSON bodies
+app.use(bodyParser.json());
 
 app.get('/', (req, res) => {
-  getChart()
-    .then((data) => res.send(data));  
-});
+  // if the site is called like http://pi:3000?offset=7, the chart and everything will calculate that here
+  if (req.query.offset) {
+    leafOffset = +req.query.offset;
+  }
 
-app.get('/test', (req, res) => {
-  res.sendFile('test.html', {
-    root: path.join(__dirname)});
+  if (req.query.startDate) 
+    startDate = req.query.startDate.toString();  
+
+  getChart(leafOffset, startDate)
+    .then((data) => res.send(data));  
 });
 
 app.listen(port, () => {
   console.log(`Server is running at http://localhost:${port}`);
 });
 
-
-// getData()
-//     .then((any) => console.log(JSON.stringify(any)))
-//     .catch((err) => console.log(JSON.stringify(err)));
